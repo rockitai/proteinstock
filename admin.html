@@ -386,7 +386,8 @@ async function settings() {
   const get = k => (data.find(r => r.key === k) || {}).value || {};
   const ship = get('shipping'), pay = get('payment'), content = get('content');
   pane().innerHTML = `<div class="card" style="display:grid;gap:22px"><div><h2 style="font-size:1.05rem;margin-bottom:10px">משלוח</h2>
-    <div class="grid2"><div class="field"><label for="fo">משלוח חינם מעל (₪)</label><input type="number" id="fo" min="0" step="1" value="${Number(ship.free_over) || 0}" dir="ltr"></div>
+    <div class="grid2"><div class="field"><label for="fo">משלוח חינם מעל (₪, אחרי הנחה)</label><input type="number" id="fo" min="0" step="1" value="${Number(ship.free_over) || 0}" dir="ltr"></div>
+    <div class="field"><label for="fol">וגם סכום העגלה לפני ההנחה לפחות (₪, 0 = בלי תנאי)</label><input type="number" id="fol" min="0" step="1" value="${Number(ship.free_over_list) || 0}" dir="ltr"></div>
     <div class="field"><label for="ff">דמי משלוח מתחת לסכום (₪)</label><input type="number" id="ff" min="0" step="0.5" value="${Number(ship.fee) || 0}" dir="ltr"></div></div>
     <label class="o" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="fp"${ship.pickup === false ? '' : ' checked'}> אפשר ללקוחות איסוף עצמי מהחנות (ללא עלות)</label>
     <p class="who" style="margin:8px 0 0">הסכום מחושב בשרת בעת ביצוע ההזמנה. הטקסטים באתר (למשל "משלוח חינם מעל ₪499") נשארים כפי שהם.</p>
@@ -407,10 +408,10 @@ async function settings() {
     e.target.disabled = false; toast(error ? 'השמירה נכשלה: ' + error.message : 'נשמר');
   };
   document.getElementById('ss').onclick = async e => {
-    const free_over = parseFloat(document.getElementById('fo').value) || 0, fee = parseFloat(document.getElementById('ff').value) || 0;
-    if (free_over < 0 || fee < 0) { toast('ערך לא תקין'); return; }
+    const free_over = parseFloat(document.getElementById('fo').value) || 0, fee = parseFloat(document.getElementById('ff').value) || 0, free_over_list = parseFloat(document.getElementById('fol').value) || 0;
+    if (free_over < 0 || fee < 0 || free_over_list < 0) { toast('ערך לא תקין'); return; }
     e.target.disabled = true;
-    const { error } = await sb.from('site_settings').update({ value: { free_over, fee, pickup: document.getElementById('fp').checked } }).eq('key', 'shipping');
+    const { error } = await sb.from('site_settings').update({ value: { free_over, free_over_list, fee, pickup: document.getElementById('fp').checked } }).eq('key', 'shipping');
     e.target.disabled = false; toast(error ? 'השמירה נכשלה: ' + error.message : 'נשמר');
   };
   let ppKeys = null;
