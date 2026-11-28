@@ -134,6 +134,9 @@
             fetch('/api/rpc/ps_save_checkout', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ p: { key, name: d.name, phone: d.phone, email: d.email, items: d.items, total: d.total, step: d.step } }) })
               .then(r => log('draft_saved', r.status)).catch(() => {});
+            // the same draft to the sales system, so the store's bot can follow up (no cookies, only this store's origin is accepted there)
+            fetch('https://sales.proteinstock.co.il/api/public/checkout-draft', { method: 'POST', keepalive: true, mode: 'cors', credentials: 'omit', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ key, name: d.name, phone: d.phone, email: d.email, items: (d.items || []).map(i => ({ name: i.name, q: i.q })), total: d.total, step: d.step }) }).catch(() => {});
           } catch (e) { /* ignore */ }
         }, 1200);
       };
